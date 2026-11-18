@@ -1,0 +1,7 @@
+Reason: NorseConditions 0.1.0 evaluates the shared condition language on live units with the right sets for every condition tried; offline 27 of 27.
+Batch B-20261117-212726-4640, 2026-11-17 21:28-21:31 (Main Agent). One launch. Offline first: tools/conditions_test.cpp, 27 of 27 (grammar, presets, Target., unreadable values, every error message).
+- Start: 3 presets loaded; "preset @broken does not compile: unknown condition 'Healt' (at character 1)" reported at start. InFight subscribed to NorseEvents. Map tracked (TitleScreen, then CombatTestMap).
+- CombatTestMap, 31 units: HasTag(Brigand) 10 (the Outcast types on the Brigands faction profile, via NorseTagger); Field(Profiles, Brigands) the same 10; UnitType(Outcast_*) AND NOT IsAlly 11 (adds Outcast_Cutthroat, an Outcast type not on that profile - the game's data); IsAlly 2 (the party); Map(CombatTestMap) AND HealthPercent == 100 the full-health units; Healt < 3 -> "unknown condition 'Healt' (at character 1)".
+- InFight: false for all before prepfight, true for all after (FightStarted from NorseRealtimeNative through NorseEvents).
+- One Nithing set 5 -> 4 health: @HurtBrigand (= @Hurt AND HasTag(Brigand), @Hurt = HealthPercent < 100) true for exactly that unit.
+- Not exercised: NC_Compile / NC_Eval from another mod (no consumer yet - AnimSwap, HUD and Impact will be), Distance, Chance, Team.
