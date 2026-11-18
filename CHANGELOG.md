@@ -5,3 +5,6 @@
 - The condition language (include/NorseConditions.hpp): AND/OR/NOT, brackets, comparisons, Target., @presets; errors with positions; unreadable values are false.
 - Norse conditions: Health, MaxHealth, HealthPercent, IsDead, HasTag, UnitType, Field, Team, IsAlly, IsEnemy, InFight, Map, Chance, Distance.
 - Presets from conditions/*.ini (NorseManifest order), checked at start; exports NC_Compile, NC_Eval; console nc.eval, nc.list, nc.reload.
+
+### Fixed (2026-11-18)
+- World conditions (Map, InFight, Chance) read as false when the moment has no unit (a map load): they are now asked without one (AddWorld). 3 offline tests added.

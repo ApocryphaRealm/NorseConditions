@@ -35,6 +35,7 @@ int main()
         return U(u)->type.rfind(a[0].substr(0, a[0].size() - 1), 0) == 0 ? 1 : 0; // "X*" prefix only, enough here
     });
     r.Add(L"Pair", 2, 2, [&](void*, const nc::Context&, const auto& a) { return std::optional<double>(a[0] == L"a" && a[1] == L"b(c)" ? 1 : 0); });
+    r.AddWorld(L"InTown", 0, 0, [&](void*, const nc::Context&, const auto&) { return std::optional<double>(1); });
     r.AddPreset(L"Hurt", L"HealthPercent < 50");
     r.AddPreset(L"HurtBrigand", L"@Hurt AND HasTag(Brigand)");
     r.AddPreset(L"Loop1", L"@Loop2");
@@ -77,6 +78,10 @@ int main()
     Check(E(L"@Nope").find("no preset") != std::string::npos, "missing preset error");
     Check(E(L"Health < 3 Health").find("unexpected text") != std::string::npos, "trailing text error");
     Check(!nc::Condition::Compile(L"Healt", r).Eval(c), "a broken condition is always false");
+    nc::Context none{};
+    Check(nc::Condition::Compile(L"InTown", r).Eval(none), "a world condition is asked with no unit (NorseSound MapLoaded)");
+    Check(!nc::Condition::Compile(L"Health > 0", r).Eval(none), "a unit condition with no unit is false, never a crash");
+    Check(!nc::Condition::Compile(L"InTown AND Health > 0", r).Eval(none), "a mix with no unit: the unit part is false");
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail ? 1 : 0;
 }

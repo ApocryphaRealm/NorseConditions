@@ -151,11 +151,11 @@ namespace
             if (!t) return std::nullopt;
             return B(*t != 0);
         }, L"not on the player's side");
-        g_reg.Add(L"InFight", 0, 0, [](void*, const nc::Context&, const Args&) { return B(g_inFight); },
+        g_reg.AddWorld(L"InFight", 0, 0, [](void*, const nc::Context&, const Args&) { return B(g_inFight); },
                   L"a fight is on (NorseEvents FightStarted, until FightEnded or a new map)");
-        g_reg.Add(L"Map", 1, 1, [](void*, const nc::Context&, const Args& a) { return B(Lower(g_map).find(Lower(a[0])) != std::wstring::npos); },
+        g_reg.AddWorld(L"Map", 1, 1, [](void*, const nc::Context&, const Args& a) { return B(Lower(g_map).find(Lower(a[0])) != std::wstring::npos); },
                   L"the current map's path contains text");
-        g_reg.Add(L"Chance", 1, 1, [](void*, const nc::Context&, const Args& a) {
+        g_reg.AddWorld(L"Chance", 1, 1, [](void*, const nc::Context&, const Args& a) {
             static std::mt19937 rng{std::random_device{}()};
             return B(std::uniform_real_distribution<double>(0, 100)(rng) < _wtof(a[0].c_str()));
         }, L"true n percent of the times it is asked");

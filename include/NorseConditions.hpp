@@ -40,6 +40,7 @@ struct CondDef
     int minArgs = 0, maxArgs = 0;
     CondFn fn;
     std::wstring help;
+    bool needsUnit = true; // false: about the world (Map, InFight, Chance) - asked even when the moment has no unit
 };
 
 class Registry
@@ -48,6 +49,12 @@ class Registry
     void Add(const std::wstring& name, int minArgs, int maxArgs, CondFn fn, const std::wstring& help = L"")
     {
         m_defs[Low(name)] = CondDef{name, minArgs, maxArgs, std::move(fn), help};
+    }
+    // A condition about the world, not a unit: evaluated with a null unit too (NorseSound MapLoaded, 2026-11-18)
+    void AddWorld(const std::wstring& name, int minArgs, int maxArgs, CondFn fn, const std::wstring& help = L"")
+    {
+        Add(name, minArgs, maxArgs, std::move(fn), help);
+        m_defs[Low(name)].needsUnit = false;
     }
     void AddPreset(const std::wstring& name, const std::wstring& expr) { m_presets[Low(name)] = expr; }
     const CondDef* Find(const std::wstring& name) const
@@ -146,7 +153,7 @@ class Condition
         case Node::Ref:
         {
             void* unit = n.onTarget ? ctx.target : ctx.subject;
-            if (!unit) return std::nullopt;
+            if (!unit && n.def->needsUnit) return std::nullopt;
             try
             {
                 return n.def->fn(unit, ctx, n.args);
