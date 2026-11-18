@@ -1,0 +1,6 @@
+Reason: NorseConditions' new MainHand, OffHand and Equipped conditions read what each unit really carries - after following each slot's runtime item to its item asset - and a control condition is true for no one.
+Batch B-20261118-034026-745f, 2026-11-18 03:40-03:46 (Main Agent). Two launches.
+- Launch 1: all four nc.eval checks true for 0 of 31 units. Probe (Lua): the slots hold runtime items - MainHandSlot = Item_Weapon /Game/.../BP_Metahuman_Unit_C_2147481970.Item_Weapon_2147481967 - whose names do not say what the item is; Item_Weapon / Item_Armor carry an Asset field (the item asset).
+- Fix: every item object path in the field's text is looked up and its Asset added to the text matched.
+- Launch 2 on CombatTestMap: MainHand(Spear) true for 5 of 31, OffHand(Shield) 5 of 31, Equipped(Helmet) 8 of 31, Equipped(Axe) 14 of 31, Equipped(NoSuchItem) 0 of 31.
+- Not done: a "mission" condition (Map() already tells the level; Norse's mission state is not yet mapped).

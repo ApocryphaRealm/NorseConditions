@@ -136,6 +136,55 @@ namespace
             std::wstring v = Lower(Export(p, reinterpret_cast<uint8_t*>(type) + p->GetOffset_Internal(), type));
             return B(v.find(Lower(a[1])) != std::wstring::npos);
         }, L"a field of the unit type contains text - Field(Profiles, Brigands) is the faction");
+        // What the unit carries (refinement 2026-11-18): the unit's own MainHandSlot / OffhandSlot / AlternativeWeapon and
+        // its EquippedArmor map, read as text - an item asset or a weapon actor (its name holds the BP class)
+        // The slots hold runtime items (Item_Weapon / Item_Armor objects, named Item_Weapon_2147...); what the item IS is
+        // its Asset field (the first test read only the slot and matched nothing). Every item object path found in the
+        // field's text is followed to its Asset, so the text holds the item assets' names.
+        auto fieldText = [](UObject* o, const wchar_t* field) -> std::optional<std::wstring> {
+            auto* cls = o ? reinterpret_cast<UStruct*>(Reflect::Get().ClassOf(o)) : nullptr;
+            FProperty* p = cls ? FindProp(cls, field) : nullptr;
+            if (!p) return std::nullopt;
+            return Export(p, reinterpret_cast<uint8_t*>(o) + p->GetOffset_Internal(), o);
+        };
+        auto unitText = [fieldText](void* u, const wchar_t* field) -> std::optional<std::wstring> {
+            auto t = fieldText(static_cast<UObject*>(u), field);
+            if (!t) return std::nullopt;
+            std::wstring out = Lower(*t);
+            // object paths inside the text: Class'/Game/...Item_Weapon_123' or a bare /Game/... path
+            for (size_t p = 0; (p = t->find(L"/Game/", p)) != std::wstring::npos;)
+            {
+                size_t e = t->find_first_of(L"'\",) ", p);
+                std::wstring path = t->substr(p, e == std::wstring::npos ? std::wstring::npos : e - p);
+                p = e == std::wstring::npos ? t->size() : e;
+                if (path.find(L"Item_") == std::wstring::npos) continue;
+                if (UObject* item = FindObj(path.c_str()))
+                    if (auto a = fieldText(item, L"Asset")) out += L" " + Lower(*a);
+            }
+            return out;
+        };
+        g_reg.Add(L"MainHand", 1, 1, [unitText](void* u, const nc::Context&, const Args& a) -> std::optional<double> {
+            auto t = unitText(u, L"MainHandSlot");
+            if (!t) return std::nullopt;
+            return B(t->find(Lower(a[0])) != std::wstring::npos);
+        }, L"what the unit holds in its main hand contains text - MainHand(Spear)");
+        g_reg.Add(L"OffHand", 1, 1, [unitText](void* u, const nc::Context&, const Args& a) -> std::optional<double> {
+            auto t = unitText(u, L"OffhandSlot");
+            if (!t) return std::nullopt;
+            return B(t->find(Lower(a[0])) != std::wstring::npos);
+        }, L"what the unit holds in its off hand contains text - OffHand(Shield)");
+        g_reg.Add(L"Equipped", 1, 1, [unitText](void* u, const nc::Context&, const Args& a) -> std::optional<double> {
+            std::wstring want = Lower(a[0]);
+            bool any = false;
+            for (const wchar_t* f : {L"MainHandSlot", L"OffhandSlot", L"AlternativeWeapon", L"EquippedArmor"})
+                if (auto t = unitText(u, f))
+                {
+                    any = true;
+                    if (t->find(want) != std::wstring::npos) return B(true);
+                }
+            if (!any) return std::nullopt;
+            return B(false);
+        }, L"anything the unit has equipped (weapons, shield, armour) contains text - Equipped(Helmet_Berserker)");
         g_reg.Add(L"Team", 0, 0, [](void* u, const nc::Context&, const Args&) -> std::optional<double> {
             auto t = Team(u);
             if (!t) return std::nullopt;

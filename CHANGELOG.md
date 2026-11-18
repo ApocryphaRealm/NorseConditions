@@ -8,3 +8,6 @@
 
 ### Fixed (2026-11-18)
 - World conditions (Map, InFight, Chance) read as false when the moment has no unit (a map load): they are now asked without one (AddWorld). 3 offline tests added.
+
+### Added (2026-11-18)
+- Conditions MainHand(text), OffHand(text), Equipped(text): what the unit carries (each slot's item followed to its item asset). Tested in game: docs-equipment-test.txt.
