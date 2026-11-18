@@ -28,7 +28,7 @@ namespace
     std::mutex g_mx;
     bool g_inFight = false;
     std::wstring g_map;
-    UObject* g_teamLib = nullptr;
+    UObject* g_teamLib = nullptr; // lives-forever (the team function library's Default__ object)
 
     fs::path ModDir()
     {
