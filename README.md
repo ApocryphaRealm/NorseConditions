@@ -31,3 +31,7 @@ and current mission conditions (how to read the mission is still to be found in 
 
 Build: `xmake f -p windows -a x64 -m release --toolchain=msvc -y`, then `xmake build main` (needs `../NorsePatcher`,
 `../NorseManifest` and `../NorseEvents` beside it).
+
+## Licence
+
+GPL-3.0-or-later (see LICENSE).
