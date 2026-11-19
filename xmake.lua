@@ -3,7 +3,7 @@
 --   conditions_test : the offline test (no game) - xmake build conditions_test && xmake run conditions_test
 --   main          : the UE4SS mod that writes the full report to NorseManifest.log (needs ../NorsePatcher for UE4SS)
 set_project("NorseConditions")
-local version = "0.1.0"
+local version = "1.0.0"
 set_version(version)
 set_xmakever("2.8.0")
 
@@ -26,6 +26,11 @@ target("main")
     add_files("src/*.cpp")
     add_includedirs("include", "../NorsePatcher/include", "../NorseManifest/include", "../NorseEvents/include")
     add_defines("NC_VERSION=\"" .. version .. "\"")
+    -- VERSIONINFO (rule 6): src/version.rc reads these; the numbers come from `version`, which only version-gate writes
+    add_files("src/version.rc")
+    add_defines("NORSE_VER_STR=\"" .. version .. "\"")
+    add_defines("NORSE_VER_MAJOR=" .. version:match("^(%d+)"), "NORSE_VER_MINOR=" .. version:match("^%d+%.(%d+)"),
+                "NORSE_VER_PATCH=" .. version:match("^%d+%.%d+%.(%d+)"))
     add_linkdirs("../NorsePatcher/build/ue4ss")
     add_links("UE4SS", "user32")
     set_symbols("debug")
